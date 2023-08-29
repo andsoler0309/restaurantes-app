@@ -4,6 +4,12 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 db = SQLAlchemy()
 
+#Tabla intermedia para muchos a muchos de los menus y las recetas
+class MenuReceta(db.Model):
+    __tablename__ = 'menu_receta'
+    menu_id = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
+    receta_id = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
+
 class Ingrediente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(128))
@@ -32,6 +38,13 @@ class Usuario(db.Model):
     usuario = db.Column(db.String(50))
     contrasena = db.Column(db.String(50))
     recetas = db.relationship('Receta', cascade='all, delete, delete-orphan')
+
+class MenuSemana(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    fecha_inicial = db.Column(db.Date)
+    fecha_final = db.Column(db.Date)
+    recetas = db.relationship('Receta', secondary='menu_receta')
 
 class IngredienteSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -72,3 +85,15 @@ class UsuarioSchema(SQLAlchemyAutoSchema):
         load_instance = True
         
     id = fields.String()
+
+class MenuSemanaSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MenuSemana
+        include_relationships = True
+        load_instance = True
+
+    id = fields.String()
+    nombre = fields.String()
+    fecha_inicial = fields.Date()
+    fecha_final = fields.Date()
+    recetas = fields.List(fields.Nested(RecetaSchema()))

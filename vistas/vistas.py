@@ -10,14 +10,16 @@ from modelos import \
     Ingrediente, IngredienteSchema, \
     RecetaIngrediente, RecetaIngredienteSchema, \
     Receta, RecetaSchema, \
-    Usuario, UsuarioSchema
+    Usuario, UsuarioSchema, \
+    MenuSemana, MenuSemanaSchema, \
+    MenuReceta
 
 
 ingrediente_schema = IngredienteSchema()
 receta_ingrediente_schema = RecetaIngredienteSchema()
 receta_schema = RecetaSchema()
 usuario_schema = UsuarioSchema()
-    
+menu_semana_schema = MenuSemanaSchema()
 class VistaSignIn(Resource):
 
     def post(self):
@@ -224,4 +226,27 @@ class VistaReceta(Resource):
                 receta_ingrediente_retornar = receta_ingrediente
                 
         return receta_ingrediente_retornar
-        
+
+
+class VistaMenuSemana(Resource):
+    #@jwt_required()
+    #def get(self):
+        #menus = Ingrediente.query.all()
+        #return [ingrediente_schema.dump(ingrediente) for ingrediente in ingredientes]
+
+    @jwt_required()
+    def post(self):
+        nombre_menu_repetido = MenuSemana.query.filter_by(nombre=request.json["nombre"]).all()
+        if len(nombre_menu_repetido) > 0:
+            return "El nombre del menu ya existe", 400
+        nuevo_menu_semana = MenuSemana( \
+            nombre=request.json["nombre"], \
+            fecha_inicial=datetime.strptime(request.json["fecha_inicial"],'%d/%m/%Y').date(), \
+            fecha_final=datetime.strptime(request.json["fecha_final"],'%d/%m/%Y').date(),
+            )
+        db.session.add(nuevo_menu_semana)
+        db.session.commit()
+        for receta_id in request.json["recetas"]:
+            receta_menu = MenuReceta(menu_id=nuevo_menu_semana.id,receta_id=receta_id)
+            db.session.add(receta_menu)
+        return ingrediente_schema.dump(nuevo_menu_semana)
