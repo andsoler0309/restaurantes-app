@@ -239,10 +239,26 @@ class VistaMenuSemana(Resource):
         nombre_menu_repetido = MenuSemana.query.filter_by(nombre=request.json["nombre"]).all()
         if len(nombre_menu_repetido) > 0:
             return "El nombre del menu ya existe", 400
+        try:
+            fecha_inicial = datetime.strptime(request.json["fecha_inicial"],'%d/%m/%Y').date()
+            fecha_final = datetime.strptime(request.json["fecha_final"],'%d/%m/%Y').date()
+        except Exception as e:
+            return {"error": str(e)}, 400
+
+        todos_menus = MenuSemana.query.all()
+        for menu in todos_menus:
+            if (fecha_final >= menu.fecha_final >= fecha_inicial) or \
+                    (fecha_final >= menu.fecha_inicial >= fecha_inicial):
+                return "Las fechas tienen conflicto con las de otro menu", 400
+
+        diff_fecha = fecha_final - fecha_inicial
+        if diff_fecha.days !=7:
+            return "Las fechas no tienen la diferencia correcta", 400
+
         nuevo_menu_semana = MenuSemana( \
             nombre=request.json["nombre"], \
-            fecha_inicial=datetime.strptime(request.json["fecha_inicial"],'%d/%m/%Y').date(), \
-            fecha_final=datetime.strptime(request.json["fecha_final"],'%d/%m/%Y').date(),
+            fecha_inicial=fecha_inicial, \
+            fecha_final=fecha_final,
             )
         db.session.add(nuevo_menu_semana)
         db.session.commit()
