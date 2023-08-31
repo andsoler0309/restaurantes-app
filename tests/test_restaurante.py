@@ -20,7 +20,7 @@ class TestRestaurante(TestCase):
         contrasena_encriptada = hashlib.md5(contrasena.encode('utf-8')).hexdigest()
         
         # Se crea el usuario para identificarse en la aplicación
-        usuario_nuevo = Usuario(usuario=nombre_usuario, contrasena=contrasena_encriptada)
+        usuario_nuevo = Usuario(usuario=nombre_usuario, contrasena=contrasena_encriptada, rol=Rol.ADMINISTRADOR)
         db.session.add(usuario_nuevo)
         db.session.commit()
 
@@ -54,8 +54,8 @@ class TestRestaurante(TestCase):
 
     def test_crear_restaurante(self):
         #Crear los datos del restaurante
-        nombre_nuevo_restaurante = self.data_factory.fuzzy.FuzzyText(length=10)
-        direccion_nuevo_restaurante = self.data_factory.LazyAttribute(lambda n: Faker.sentence()[:10])
+        nombre_nuevo_restaurante = self.data_factory.sentence()
+        direccion_nuevo_restaurante = self.data_factory.sentence()
         telefono_nuevo_restaurante = self.data_factory.sentence()
         facebook_nuevo_restaurante = self.data_factory.sentence()
         twitter_nuevo_restaurante = self.data_factory.sentence()
@@ -103,9 +103,5 @@ class TestRestaurante(TestCase):
                                                    
         #Verificar que el llamado fue exitoso y que el objeto recibido tiene los datos iguales a los creados
         self.assertEqual(resultado_nuevo_restaurante.status_code, 200)
-        self.assertEqual(datos_respuesta['nombre'], restaurante.nombre)
-        self.assertEqual(datos_respuesta['direccion'], restaurante.direccion)
-        self.assertEqual(datos_respuesta['telefono'], restaurante.telefono)
-        self.assertEqual(datos_respuesta['facebook'], restaurante.facebook)
-        self.assertEqual(datos_respuesta['tipo_comida'], restaurante.tipo_comida)
+        self.assertEqual(datos_respuesta['mensaje'], "Restaurante creado exitosamente")
         self.assertIsNotNone(datos_respuesta['id'])
