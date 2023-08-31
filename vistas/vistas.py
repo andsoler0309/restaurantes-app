@@ -1,5 +1,5 @@
 from flask import request
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -11,8 +11,7 @@ from modelos import \
     RecetaIngrediente, RecetaIngredienteSchema, \
     Receta, RecetaSchema, \
     Usuario, UsuarioSchema,\
-    Restaurante, RestauranteSchema
-
+    Restaurante, RestauranteSchema, Rol
 
 ingrediente_schema = IngredienteSchema()
 receta_ingrediente_schema = RecetaIngredienteSchema()
@@ -26,7 +25,7 @@ class VistaSignIn(Resource):
         usuario = Usuario.query.filter(Usuario.usuario == request.json["usuario"]).first()
         if usuario is None:
             contrasena_encriptada = hashlib.md5(request.json["contrasena"].encode('utf-8')).hexdigest()
-            nuevo_usuario = Usuario(usuario=request.json["usuario"], contrasena=contrasena_encriptada)
+            nuevo_usuario = Usuario(usuario=request.json["usuario"], contrasena=contrasena_encriptada,rol= Rol.ADMINISTRADOR)
             db.session.add(nuevo_usuario)
             db.session.commit()
             token_de_acceso = create_access_token(identity=nuevo_usuario.id)
@@ -230,10 +229,17 @@ class VistaReceta(Resource):
 class VistaRestaurante(Resource):
     @jwt_required()
     def post(self):
-        usuario = Usuario.query.filter(Usuario.id == request.json["administrador"]).first()
-
+        user_id = get_jwt_identity()
+        usuario = Usuario.query.filter(Usuario.id == user_id).first()
+        restaurante = Restaurante.query.filter(Restaurante.nombre == request.json["nombre"] 
+                                               or Restaurante.direccion == request.json["direccion"]).first()
         if usuario is None:
             return "El Administrador no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden crear Restaurantes", 401
+        elif restaurante is not None:
+            return 'Ya existe un restaurante con nombre: '+request.json["nombre"] +', y direccion: '+request.json["direccion"], 400
+
         else:
             nuevo_restaurante = Restaurante(nombre = request.json["nombre"], \
                                         direccion = request.json["direccion"], \
@@ -247,7 +253,7 @@ class VistaRestaurante(Resource):
                                         is_rappi = request.json["is_rappi"], \
                                         is_didi = request.json["is_didi"], \
                                         is_domicilios = request.json["is_domicilios"],\
-                                        administrador = request.json["administrador"])
+                                        administrador = user_id)
 
         db.session.add(nuevo_restaurante)
         db.session.commit()
