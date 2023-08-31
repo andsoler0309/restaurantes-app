@@ -227,11 +227,11 @@ class VistaReceta(Resource):
                 
         return receta_ingrediente_retornar
     
-class VistaRestaurante(Resource):
+class VistaRestaurantes(Resource):
     @jwt_required()
-    def post(self):
-        user_id = get_jwt_identity()
-        usuario = Usuario.query.filter(Usuario.id == user_id).first()
+    def post(self,id_usuario):
+        ##user_id = get_jwt_identity()
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         restaurante = Restaurante.query.filter(Restaurante.nombre == request.json["nombre"]).first()
         if usuario is None:
             return "El Administrador no existe", 404
@@ -253,7 +253,7 @@ class VistaRestaurante(Resource):
                                         is_rappi = request.json["is_rappi"], \
                                         is_didi = request.json["is_didi"], \
                                         is_domicilios = request.json["is_domicilios"],\
-                                        administrador = user_id)
+                                        administrador = id_usuario)
 
         db.session.add(nuevo_restaurante)
         db.session.commit()
