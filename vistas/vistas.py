@@ -11,7 +11,8 @@ from modelos import \
     RecetaIngrediente, RecetaIngredienteSchema, \
     Receta, RecetaSchema, \
     Usuario, UsuarioSchema,\
-    Restaurante, RestauranteSchema, Rol
+    Restaurante, RestauranteSchema,\
+    Rol
 
 ingrediente_schema = IngredienteSchema()
 receta_ingrediente_schema = RecetaIngredienteSchema()
@@ -231,14 +232,13 @@ class VistaRestaurante(Resource):
     def post(self):
         user_id = get_jwt_identity()
         usuario = Usuario.query.filter(Usuario.id == user_id).first()
-        restaurante = Restaurante.query.filter(Restaurante.nombre == request.json["nombre"] 
-                                               or Restaurante.direccion == request.json["direccion"]).first()
+        restaurante = Restaurante.query.filter(Restaurante.nombre == request.json["nombre"]).first()
         if usuario is None:
             return "El Administrador no existe", 404
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden crear Restaurantes", 401
         elif restaurante is not None:
-            return 'Ya existe un restaurante con nombre: '+request.json["nombre"] +', y direccion: '+request.json["direccion"], 400
+            return 'Ya existe un restaurante con nombre: '+request.json["nombre"] , 400
 
         else:
             nuevo_restaurante = Restaurante(nombre = request.json["nombre"], \

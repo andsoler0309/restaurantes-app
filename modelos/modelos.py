@@ -9,16 +9,16 @@ db = SQLAlchemy()
 
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(128))
-    direccion = db.Column(db.String(128))
-    telefono = db.Column(db.String(128))
-    facebook = db.Column(db.String(128))
-    twitter = db.Column(db.String(128))
-    instagram = db.Column(db.String(128))
-    hora_atencion = db.Column(db.String(128))
+    nombre = db.Column(db.String(100))
+    direccion = db.Column(db.String(200))
+    telefono = db.Column(db.String(15))
+    facebook = db.Column(db.String(500))
+    twitter = db.Column(db.String(500))
+    instagram = db.Column(db.String(500))
+    hora_atencion = db.Column(db.String(250))
     is_en_lugar = db.Column(db.Boolean, unique=False, default=False)
     is_domicilios = db.Column(db.Boolean, unique=False, default=False)
-    tipo_comida = db.Column(db.String(128))
+    tipo_comida = db.Column(db.String(200))
     is_rappi = db.Column(db.Boolean, unique=False, default=False)
     is_didi = db.Column(db.Boolean, unique=False, default=False)
     administrador = db.Column(db.Integer, db.ForeignKey('usuario.id'))    
@@ -47,13 +47,17 @@ class Receta(db.Model):
     ingredientes = db.relationship('RecetaIngrediente', cascade='all, delete, delete-orphan')
     usuario = db.Column(db.Integer, db.ForeignKey('usuario.id'))
 
+class Rol(enum.Enum):
+	ADMINISTRADOR = 1
+	CHEF = 2
+
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario = db.Column(db.String(50))
     contrasena = db.Column(db.String(50))
     recetas = db.relationship('Receta', cascade='all, delete, delete-orphan')
     restaurantes = db.relationship('Restaurante', cascade='all, delete, delete-orphan')
-    
+    rol = db.Column(db.Enum(Rol))
     
 class RestauranteSchema(SQLAlchemyAutoSchema):
     class Meta:
