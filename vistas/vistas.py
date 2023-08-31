@@ -10,13 +10,15 @@ from modelos import \
     Ingrediente, IngredienteSchema, \
     RecetaIngrediente, RecetaIngredienteSchema, \
     Receta, RecetaSchema, \
-    Usuario, UsuarioSchema
+    Usuario, UsuarioSchema,\
+    Restaurante, RestauranteSchema
 
 
 ingrediente_schema = IngredienteSchema()
 receta_ingrediente_schema = RecetaIngredienteSchema()
 receta_schema = RecetaSchema()
 usuario_schema = UsuarioSchema()
+restauranteSchema = RestauranteSchema()
     
 class VistaSignIn(Resource):
 
@@ -224,4 +226,31 @@ class VistaReceta(Resource):
                 receta_ingrediente_retornar = receta_ingrediente
                 
         return receta_ingrediente_retornar
+    
+class VistaRestaurante(Resource):
+    @jwt_required()
+    def post(self):
+        usuario = Usuario.query.filter(Usuario.id == request.json["administrador"]).first()
+
+        if usuario is None:
+            return "El Administrador no existe", 404
+        else:
+            nuevo_restaurante = Restaurante(nombre = request.json["nombre"], \
+                                        direccion = request.json["direccion"], \
+                                        telefono = request.json["telefono"], \
+                                        hora_atencion = request.json["hora_atencion"], \
+                                        facebook = request.json["facebook"], \
+                                        instagram = request.json["instagram"], \
+                                        twitter = request.json["twitter"], \
+                                        tipo_comida = request.json["tipo_comida"], \
+                                        is_en_lugar = request.json["is_en_lugar"], \
+                                        is_rappi = request.json["is_rappi"], \
+                                        is_didi = request.json["is_didi"], \
+                                        is_domicilios = request.json["is_domicilios"],\
+                                        administrador = request.json["administrador"])
+
+        db.session.add(nuevo_restaurante)
+        db.session.commit()
+        ##TODO enviar el Schema como respuesta
+        return {"mensaje": "Restaurante creado exitosamente", "id": nuevo_restaurante.id}
         

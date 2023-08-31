@@ -1,8 +1,28 @@
+import enum
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
+
 db = SQLAlchemy()
+
+
+class Restaurante(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(128))
+    direccion = db.Column(db.String(128))
+    telefono = db.Column(db.String(128))
+    facebook = db.Column(db.String(128))
+    twitter = db.Column(db.String(128))
+    instagram = db.Column(db.String(128))
+    hora_atencion = db.Column(db.String(128))
+    is_en_lugar = db.Column(db.Boolean, unique=False, default=False)
+    is_domicilios = db.Column(db.Boolean, unique=False, default=False)
+    tipo_comida = db.Column(db.String(128))
+    is_rappi = db.Column(db.Boolean, unique=False, default=False)
+    is_didi = db.Column(db.Boolean, unique=False, default=False)
+    administrador = db.Column(db.Integer, db.ForeignKey('usuario.id'))    
+
 
 class Ingrediente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +52,17 @@ class Usuario(db.Model):
     usuario = db.Column(db.String(50))
     contrasena = db.Column(db.String(50))
     recetas = db.relationship('Receta', cascade='all, delete, delete-orphan')
+    restaurantes = db.relationship('Restaurante', cascade='all, delete, delete-orphan')
+    
+    
+class RestauranteSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Restaurante
+        include_relationships = True
+        include_fk = True
+        load_instance = True
+
+    id = fields.String()
 
 class IngredienteSchema(SQLAlchemyAutoSchema):
     class Meta:
