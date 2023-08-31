@@ -1,5 +1,5 @@
 from flask import request
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -10,13 +10,15 @@ from modelos import \
     Ingrediente, IngredienteSchema, \
     RecetaIngrediente, RecetaIngredienteSchema, \
     Receta, RecetaSchema, \
-    Usuario, UsuarioSchema
-
+    Usuario, UsuarioSchema,\
+    Restaurante, RestauranteSchema,\
+    Rol
 
 ingrediente_schema = IngredienteSchema()
 receta_ingrediente_schema = RecetaIngredienteSchema()
 receta_schema = RecetaSchema()
 usuario_schema = UsuarioSchema()
+restauranteSchema = RestauranteSchema()
     
 class VistaSignIn(Resource):
 
@@ -24,7 +26,7 @@ class VistaSignIn(Resource):
         usuario = Usuario.query.filter(Usuario.usuario == request.json["usuario"]).first()
         if usuario is None:
             contrasena_encriptada = hashlib.md5(request.json["contrasena"].encode('utf-8')).hexdigest()
-            nuevo_usuario = Usuario(usuario=request.json["usuario"], contrasena=contrasena_encriptada)
+            nuevo_usuario = Usuario(usuario=request.json["usuario"], contrasena=contrasena_encriptada,rol= Rol.ADMINISTRADOR)
             db.session.add(nuevo_usuario)
             db.session.commit()
             token_de_acceso = create_access_token(identity=nuevo_usuario.id)
@@ -224,4 +226,37 @@ class VistaReceta(Resource):
                 receta_ingrediente_retornar = receta_ingrediente
                 
         return receta_ingrediente_retornar
+    
+class VistaRestaurantes(Resource):
+    @jwt_required()
+    def post(self,id_usuario):
+        ##user_id = get_jwt_identity()
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        restaurante = Restaurante.query.filter(Restaurante.nombre == request.json["nombre"]).first()
+        if usuario is None:
+            return "El Administrador no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden crear Restaurantes", 401
+        elif restaurante is not None:
+            return 'Ya existe un restaurante con nombre: '+request.json["nombre"] , 400
+
+        else:
+            nuevo_restaurante = Restaurante(nombre = request.json["nombre"], \
+                                        direccion = request.json["direccion"], \
+                                        telefono = request.json["telefono"], \
+                                        hora_atencion = request.json["hora_atencion"], \
+                                        facebook = request.json["facebook"], \
+                                        instagram = request.json["instagram"], \
+                                        twitter = request.json["twitter"], \
+                                        tipo_comida = request.json["tipo_comida"], \
+                                        is_en_lugar = request.json["is_en_lugar"], \
+                                        is_rappi = request.json["is_rappi"], \
+                                        is_didi = request.json["is_didi"], \
+                                        is_domicilios = request.json["is_domicilios"],\
+                                        administrador = id_usuario)
+
+        db.session.add(nuevo_restaurante)
+        db.session.commit()
+        ##TODO enviar el Schema como respuesta
+        return {"mensaje": "Restaurante creado exitosamente", "id": nuevo_restaurante.id}
         
