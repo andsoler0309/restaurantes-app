@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identi
 from flask_restful import Resource
 import hashlib
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 from modelos import (
     db,
@@ -360,10 +361,9 @@ class VistaMenuSemana(Resource):
             fecha_inicial=fecha_inicial, \
             fecha_final=fecha_final,
             )
+        for receta_id in request.json["recetas"]:
+            receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id)
+            nuevo_menu_semana.recetas.append(receta_menu)
         db.session.add(nuevo_menu_semana)
         db.session.commit()
-        for receta_id in request.json["recetas"]:
-            receta_menu = MenuReceta(menu_id=nuevo_menu_semana.id,receta_id=receta_id)
-            db.session.add(receta_menu)
-        db.session.commit()
-        return ingrediente_schema.dump(nuevo_menu_semana),200
+        return menu_semana_schema.dump(nuevo_menu_semana),200
