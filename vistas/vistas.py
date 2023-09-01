@@ -1,4 +1,5 @@
-from flask import request
+from flask import request, jsonify
+from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, create_access_token
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
@@ -225,3 +226,28 @@ class VistaReceta(Resource):
                 
         return receta_ingrediente_retornar
         
+
+class VistaRestaurantes(Resource):
+    restaurantes = [
+        {
+            "id": 1,
+            "nombre": "Restaurante 1",
+            "direccion": "Calle 1 # 1 - 1",
+            "telefono": "1234567",
+            "facebook": "",
+            "instagram": "",
+            "twitter": "",
+            "tipo_comida": "Comida rápida",
+            "aplicaciones": ["rappi", "didi"]
+        },
+    ]
+
+    @jwt_required()
+    def get(self, id_usuario):
+        try:
+            # restaurantes = Restaurante.query.filter_by(usuario=str(id_usuario)).all()
+            # return [restaurante_schema.dump(restaurante) for restaurante in restaurantes]
+            return self.restaurantes
+        except SQLAlchemyError as e:
+            error_message = "Error while querying the database"
+            return jsonify({"error": error_message}), 500
