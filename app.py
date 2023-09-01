@@ -30,6 +30,6 @@ api.add_resource(VistaIngredientes, '/ingredientes')
 api.add_resource(VistaIngrediente, '/ingrediente/<int:id_ingrediente>')
 api.add_resource(VistaRecetas, '/recetas/<int:id_usuario>')
 api.add_resource(VistaReceta, '/receta/<int:id_receta>')
-api.add_resource(VistaRestaurantes, '/restaurantes/<int:id_usuario>') ##crear restaurante
+api.add_resource(VistaRestaurantes, '/restaurantes/<int:id_usuario>')
 
 jwt = JWTManager(app)
