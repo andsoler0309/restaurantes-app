@@ -4,7 +4,10 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
 from modelos import db
-from vistas import *
+from vistas import \
+    VistaIngrediente, VistaIngredientes, \
+    VistaReceta, VistaRecetas, \
+    VistaSignIn, VistaLogIn, VistaRestaurantes
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dbapp.sqlite'
