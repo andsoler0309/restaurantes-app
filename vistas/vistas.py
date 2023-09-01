@@ -3,6 +3,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from flask_restful import Resource
 import hashlib
+from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 from modelos import (
     db,
@@ -17,6 +19,9 @@ from modelos import (
     Restaurante,
     RestauranteSchema,
     Rol,
+    MenuSemana,
+    MenuSemanaSchema,
+    MenuReceta
 )
 
 ingrediente_schema = IngredienteSchema()
@@ -24,7 +29,7 @@ receta_ingrediente_schema = RecetaIngredienteSchema()
 receta_schema = RecetaSchema()
 usuario_schema = UsuarioSchema()
 restaurante_schema = RestauranteSchema()
-
+menu_semana_schema = MenuSemanaSchema()
 
 class VistaSignIn(Resource):
     def post(self):
@@ -262,7 +267,6 @@ class VistaReceta(Resource):
 
         return receta_ingrediente_retornar
 
-
 class VistaRestaurantes(Resource):
     @jwt_required()
     def post(self, id_usuario):
@@ -325,3 +329,41 @@ class VistaRestaurantes(Resource):
         except SQLAlchemyError:
             error_message = "Error while querying the database"
             return {"error": error_message}, 500
+
+class VistaMenuSemana(Resource):
+    @jwt_required()
+    def get(self):
+        menus = MenuSemana.query.all()
+        return [menu_semana_schema.dump(menu) for menu in menus]
+
+    @jwt_required()
+    def post(self):
+        nombre_menu_repetido = MenuSemana.query.filter_by(nombre=request.json["nombre"]).first()
+        if nombre_menu_repetido is not None:
+            return "El nombre del menu ya existe", 400
+        try:
+            fecha_inicial = datetime.strptime(request.json["fecha_inicial"],'%Y-%m-%d').date()
+            fecha_final = datetime.strptime(request.json["fecha_final"],'%Y-%m-%d').date()
+        except Exception as e:
+            return str(e), 400
+        diff_fecha = fecha_final - fecha_inicial
+        if diff_fecha.days !=6:
+            return "Las fechas no tienen la diferencia correcta", 400
+
+        todos_menus = MenuSemana.query.all()
+        for menu in todos_menus:
+            if (fecha_final >= menu.fecha_final >= fecha_inicial) or \
+                    (fecha_final >= menu.fecha_inicial >= fecha_inicial):
+                return "Las fechas tienen conflicto con las de otro menu", 400
+
+        nuevo_menu_semana = MenuSemana( \
+            nombre=request.json["nombre"], \
+            fecha_inicial=fecha_inicial, \
+            fecha_final=fecha_final,
+            )
+        for receta_id in request.json["recetas"]:
+            receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id)
+            nuevo_menu_semana.recetas.append(receta_menu)
+        db.session.add(nuevo_menu_semana)
+        db.session.commit()
+        return menu_semana_schema.dump(nuevo_menu_semana),200

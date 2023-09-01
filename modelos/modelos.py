@@ -6,7 +6,6 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 db = SQLAlchemy()
 
-
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -76,6 +75,18 @@ class RestauranteSchema(SQLAlchemyAutoSchema):
     id = fields.String()
 
 
+class MenuSemana(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    fecha_inicial = db.Column(db.Date)
+    fecha_final = db.Column(db.Date)
+    recetas = db.relationship('MenuReceta', cascade="all, delete, delete-orphan")
+
+class MenuReceta(db.Model):
+    __tablename__ = 'menu_receta'
+    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
+    receta = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
+
 class IngredienteSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Ingrediente
@@ -118,3 +129,26 @@ class UsuarioSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
     id = fields.String()
+
+
+class MenuRecetaSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MenuReceta
+        include_relationships = True
+        include_fk = True
+        load_instance = True
+
+    receta = fields.String()
+
+
+class MenuSemanaSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = MenuSemana
+        include_relationships = True
+        load_instance = True
+
+    id = fields.String()
+    nombre = fields.String()
+    fecha_inicial = fields.Date()
+    fecha_final = fields.Date()
+    recetas = fields.List(fields.Nested(MenuRecetaSchema()))
