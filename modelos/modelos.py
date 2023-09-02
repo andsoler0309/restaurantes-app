@@ -84,8 +84,9 @@ class MenuSemana(db.Model):
 
 class MenuReceta(db.Model):
     __tablename__ = 'menu_receta'
-    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
-    receta = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'))
+    receta = db.Column(db.Integer, db.ForeignKey('receta.id'))
 
 class IngredienteSchema(SQLAlchemyAutoSchema):
     class Meta:
