@@ -6,6 +6,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 db = SQLAlchemy()
 
+
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -80,12 +81,14 @@ class MenuSemana(db.Model):
     nombre = db.Column(db.String(50))
     fecha_inicial = db.Column(db.Date)
     fecha_final = db.Column(db.Date)
-    recetas = db.relationship('MenuReceta', cascade="all, delete, delete-orphan")
+    recetas = db.relationship("MenuReceta", cascade="all, delete, delete-orphan")
+
 
 class MenuReceta(db.Model):
-    __tablename__ = 'menu_receta'
-    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
-    receta = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
+    __tablename__ = "menu_receta"
+    menu = db.Column(db.Integer, db.ForeignKey("menu_semana.id"), primary_key=True)
+    receta = db.Column(db.Integer, db.ForeignKey("receta.id"), primary_key=True)
+
 
 class IngredienteSchema(SQLAlchemyAutoSchema):
     class Meta:
