@@ -342,10 +342,11 @@ class VistaMenuSemana(Resource):
         if nombre_menu_repetido is not None:
             return "El nombre del menu ya existe", 400
         try:
-            fecha_inicial = datetime.strptime(request.json["fecha_inicial"],'%Y-%m-%d').date()
-            fecha_final = datetime.strptime(request.json["fecha_final"],'%Y-%m-%d').date()
+            fecha_inicial = datetime.strptime(request.json["fechaInicial"],'%Y-%m-%d').date()
+            fecha_final = datetime.strptime(request.json["fechaFinal"],'%Y-%m-%d').date()
         except Exception as e:
             return str(e), 400
+
         diff_fecha = fecha_final - fecha_inicial
         if diff_fecha.days !=6:
             return "Las fechas no tienen la diferencia correcta", 400
@@ -362,7 +363,7 @@ class VistaMenuSemana(Resource):
             fecha_final=fecha_final,
             )
         for receta_id in request.json["recetas"]:
-            receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id)
+            receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id["id"])
             nuevo_menu_semana.recetas.append(receta_menu)
         db.session.add(nuevo_menu_semana)
         db.session.commit()

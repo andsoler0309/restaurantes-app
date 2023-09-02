@@ -74,9 +74,9 @@ class TestMenuSemana(TestCase):
 
         nuevo_menu = {
             "nombre": nombre_nuevo_menu,
-            "fecha_inicial": fecha_inicial,
-            "fecha_final": fecha_final,
-            "recetas": [1,2,3]
+            "fechaInicial": fecha_inicial,
+            "fechaFinal": fecha_final,
+            "recetas": [{"id":1},{"id":2},{"id":3}]
         }
         endpoint_ingredientes = "/menu-semana"
         headers = {'Content-Type': 'application/json', "Authorization": "Bearer {}".format(self.token)}
