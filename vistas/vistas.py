@@ -298,7 +298,7 @@ class VistaRestaurantes(Resource):
                 is_rappi=request.json["is_rappi"],
                 is_didi=request.json["is_didi"],
                 is_domicilios=request.json["is_domicilios"],
-                administrador=id_usuario,
+                administrador_id=id_usuario
             )
 
         db.session.add(nuevo_restaurante)
@@ -377,3 +377,26 @@ class VistaMenuSemana(Resource):
         db.session.add(nuevo_menu_semana)
         db.session.commit()
         return menu_semana_schema.dump(nuevo_menu_semana), 200
+
+class VistaChef(Resource):
+    @jwt_required()
+    def post(self):
+        usuario = Usuario.query.filter(
+            Usuario.correo == request.json["correo"]
+        ).first()
+        if usuario is None:
+            contrasena_encriptada = hashlib.md5(
+                request.json["contrasena"].encode("utf-8")
+            ).hexdigest()
+            nuevo_usuario = Usuario(
+                usuario=request.json["usuario"],
+                contrasena=contrasena_encriptada,
+                rol=Rol.CHEF,
+                correo = request.json["correo"], 
+                restaurante_id = request.json["restaurante_id"]
+            )
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+            return {"mensaje": "chef creado exitosamente", "id": nuevo_usuario.id}
+        else:
+            return "El usuario ya existe", 404

@@ -21,7 +21,8 @@ class Restaurante(db.Model):
     tipo_comida = db.Column(db.String(200))
     is_rappi = db.Column(db.Boolean, unique=False, default=False)
     is_didi = db.Column(db.Boolean, unique=False, default=False)
-    administrador = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    administrador_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    chefs = db.relationship("Usuario", foreign_keys=[administrador_id])
 
 
 class Ingrediente(db.Model):
@@ -61,9 +62,25 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario = db.Column(db.String(50))
     contrasena = db.Column(db.String(50))
-    recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
-    restaurantes = db.relationship("Restaurante", cascade="all, delete, delete-orphan")
     rol = db.Column(db.Enum(Rol))
+    correo = db.Column(db.String(128))
+    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'))
+    recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
+    restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
+
+
+class MenuSemana(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    fecha_inicial = db.Column(db.Date)
+    fecha_final = db.Column(db.Date)
+    recetas = db.relationship('MenuReceta', cascade="all, delete, delete-orphan")
+
+
+class MenuReceta(db.Model):
+    __tablename__ = 'menu_receta'
+    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
+    receta = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
 
 
 class RestauranteSchema(SQLAlchemyAutoSchema):
