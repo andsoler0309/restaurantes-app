@@ -337,7 +337,7 @@ class VistaMenuSemana(Resource):
         return [menu_semana_schema.dump(menu) for menu in menus]
 
     @jwt_required()
-    def post(self):
+    def post(self, id_usuario):
         nombre_menu_repetido = MenuSemana.query.filter_by(nombre=request.json["nombre"]).first()
         if nombre_menu_repetido is not None:
             return "El nombre del menu ya existe", 400
