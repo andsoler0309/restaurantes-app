@@ -21,7 +21,7 @@ from modelos import (
     Rol,
     MenuSemana,
     MenuSemanaSchema,
-    MenuReceta
+    MenuReceta,
 )
 
 ingrediente_schema = IngredienteSchema()
@@ -30,6 +30,7 @@ receta_schema = RecetaSchema()
 usuario_schema = UsuarioSchema()
 restaurante_schema = RestauranteSchema()
 menu_semana_schema = MenuSemanaSchema()
+
 
 class VistaSignIn(Resource):
     def post(self):
@@ -267,20 +268,21 @@ class VistaReceta(Resource):
 
         return receta_ingrediente_retornar
 
+
 class VistaRestaurantes(Resource):
     @jwt_required()
     def post(self, id_usuario):
         # user_id = get_jwt_identity()
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         restaurante = Restaurante.query.filter(
-            Restaurante.nombre == request.json["nombre"]
+            Restaurante.administrador_id == id_usuario and Restaurante.nombre == request.json["nombre"]
         ).first()
         if usuario is None:
             return "El Administrador no existe", 404
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden crear Restaurantes", 401
         elif restaurante is not None:
-            return "Ya existe un restaurante con nombre: " + request.json["nombre"], 400
+            return "Ya existe un restaurante con nombre: " + request.json["nombre"], 422
 
         else:
             nuevo_restaurante = Restaurante(
@@ -296,7 +298,7 @@ class VistaRestaurantes(Resource):
                 is_rappi=request.json["is_rappi"],
                 is_didi=request.json["is_didi"],
                 is_domicilios=request.json["is_domicilios"],
-                administrador=id_usuario,
+                administrador_id=id_usuario
             )
 
         db.session.add(nuevo_restaurante)
@@ -319,7 +321,7 @@ class VistaRestaurantes(Resource):
         """
         try:
             restaurantes = (
-                Restaurante.query.filter_by(administrador=id_usuario)
+                Restaurante.query.filter_by(administrador_id=id_usuario)
                 .order_by(Restaurante.nombre)
                 .all()
             )
@@ -330,6 +332,7 @@ class VistaRestaurantes(Resource):
             error_message = "Error while querying the database"
             return {"error": error_message}, 500
 
+
 class VistaMenuSemana(Resource):
     @jwt_required()
     def get(self):
@@ -337,34 +340,75 @@ class VistaMenuSemana(Resource):
         return [menu_semana_schema.dump(menu) for menu in menus]
 
     @jwt_required()
-    def post(self, id_usuario):
-        nombre_menu_repetido = MenuSemana.query.filter_by(nombre=request.json["nombre"]).first()
+    def post(self,id_usuario):
+        usuario = Usuario.query.filter(
+            Usuario.id == id_usuario
+        ).first()
+        if usuario is None:
+            return "El usuario no existe", 404
+        if usuario.rol is Rol.CHEF:
+            id_restaurante = usuario.restaurante_id
+        elif usuario.rol is Rol.ADMINISTRADOR:
+            id_restaurante = request.json["id_restaurante"]
+        nombre_menu_repetido = MenuSemana.query.filter_by(
+            nombre=request.json["nombre"]
+        ).first()
+
         if nombre_menu_repetido is not None:
             return "El nombre del menu ya existe", 400
         try:
-            fecha_inicial = datetime.strptime(request.json["fechaInicial"],'%Y-%m-%d').date()
-            fecha_final = datetime.strptime(request.json["fechaFinal"],'%Y-%m-%d').date()
+            fecha_inicial = datetime.strptime(
+                request.json["fechaInicial"], "%Y-%m-%d"
+            ).date()
+            fecha_final = datetime.strptime(
+                request.json["fechaFinal"], "%Y-%m-%d"
+            ).date()
         except Exception as e:
             return str(e), 400
 
         diff_fecha = fecha_final - fecha_inicial
-        if diff_fecha.days !=6:
+        if diff_fecha.days != 6:
             return "Las fechas no tienen la diferencia correcta", 400
 
         todos_menus = MenuSemana.query.all()
         for menu in todos_menus:
-            if (fecha_final >= menu.fecha_final >= fecha_inicial) or \
-                    (fecha_final >= menu.fecha_inicial >= fecha_inicial):
+            if (fecha_final >= menu.fecha_final >= fecha_inicial) or (
+                fecha_final >= menu.fecha_inicial >= fecha_inicial
+            ):
                 return "Las fechas tienen conflicto con las de otro menu", 400
 
-        nuevo_menu_semana = MenuSemana( \
-            nombre=request.json["nombre"], \
-            fecha_inicial=fecha_inicial, \
+        nuevo_menu_semana = MenuSemana(
+            nombre=request.json["nombre"],
+            fecha_inicial=fecha_inicial,
             fecha_final=fecha_final,
-            )
+            id_restaurante=id_restaurante,
+        )
         for receta_id in request.json["recetas"]:
             receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id["id"])
             nuevo_menu_semana.recetas.append(receta_menu)
         db.session.add(nuevo_menu_semana)
         db.session.commit()
-        return menu_semana_schema.dump(nuevo_menu_semana),200
+        return menu_semana_schema.dump(nuevo_menu_semana), 200
+
+class VistaChef(Resource):
+    @jwt_required()
+    def post(self):
+        usuario = Usuario.query.filter(
+            Usuario.usuario == request.json["usuario"]
+        ).first()
+        if usuario is None:
+            contrasena_encriptada = hashlib.md5(
+                request.json["contrasena"].encode("utf-8")
+            ).hexdigest()
+            nuevo_usuario = Usuario(
+                usuario=request.json["usuario"],
+                contrasena=contrasena_encriptada,
+                rol=Rol.CHEF,
+                nombre = request.json["nombre"], 
+                restaurante_id = request.json["restaurante_id"]
+            )
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+            return {"mensaje": "chef creado exitosamente", "id": nuevo_usuario.id}
+        else:
+            return "El usuario ya existe", 404
