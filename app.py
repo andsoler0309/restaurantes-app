@@ -29,7 +29,7 @@ app_context.push()
 db.init_app(app)
 db.create_all()
 
-cors = CORS(app)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 api = Api(app)
 
@@ -41,6 +41,6 @@ api.add_resource(VistaRecetas, '/recetas/<int:id_usuario>')
 api.add_resource(VistaReceta, '/receta/<int:id_receta>')
 api.add_resource(VistaRestaurantes, '/restaurantes/<int:id_usuario>')
 api.add_resource(VistaMenuSemana, '/menu-semana/<int:id_usuario>')
-api.add_resource(VistaChef, '/chef')
+api.add_resource(VistaChef, '/chefs/<int:id_usuario>')
 
 jwt = JWTManager(app)
