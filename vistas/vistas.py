@@ -348,11 +348,12 @@ class VistaMenuSemana(Resource):
         usuario = Usuario.query.filter(
             Usuario.id == id_usuario
         ).first()
+        id_restaurante = None
         if usuario is None:
             return "El usuario no existe", 404
         if usuario.rol is Rol.CHEF:
             id_restaurante = usuario.restaurante_id
-        elif usuario.rol is Rol.ADMINISTRADOR:
+        else:
             id_restaurante = request.json["id_restaurante"]
         nombre_menu_repetido = MenuSemana.query.filter_by(
             nombre=request.json["nombre"]
