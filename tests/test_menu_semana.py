@@ -78,9 +78,8 @@ class TestMenuSemana(TestCase):
             "nombre": nombre_nuevo_menu,
             "fechaInicial": fecha_inicial,
             "fechaFinal": fecha_final,
-            "recetas": [{"id":1},{"id":2},{"id":3}],
+            "recetas": [{"id": 1}, {"id": 2}, {"id": 3}],
             "id_restaurante": 1,
-
         }
         endpoint_ingredientes = "/menu-semana/1"
         headers = {
