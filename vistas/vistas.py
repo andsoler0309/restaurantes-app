@@ -275,14 +275,14 @@ class VistaRestaurantes(Resource):
         # user_id = get_jwt_identity()
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         restaurante = Restaurante.query.filter(
-            Restaurante.nombre == request.json["nombre"]
+            Restaurante.administrador_id == id_usuario and Restaurante.nombre == request.json["nombre"]
         ).first()
         if usuario is None:
             return "El Administrador no existe", 404
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden crear Restaurantes", 401
         elif restaurante is not None:
-            return "Ya existe un restaurante con nombre: " + request.json["nombre"], 400
+            return "Ya existe un restaurante con nombre: " + request.json["nombre"], 422
 
         else:
             nuevo_restaurante = Restaurante(
@@ -321,7 +321,7 @@ class VistaRestaurantes(Resource):
         """
         try:
             restaurantes = (
-                Restaurante.query.filter_by(administrador=id_usuario)
+                Restaurante.query.filter_by(administrador_id=id_usuario)
                 .order_by(Restaurante.nombre)
                 .all()
             )
@@ -382,7 +382,7 @@ class VistaChef(Resource):
     @jwt_required()
     def post(self):
         usuario = Usuario.query.filter(
-            Usuario.correo == request.json["correo"]
+            Usuario.usuario == request.json["usuario"]
         ).first()
         if usuario is None:
             contrasena_encriptada = hashlib.md5(
@@ -392,7 +392,7 @@ class VistaChef(Resource):
                 usuario=request.json["usuario"],
                 contrasena=contrasena_encriptada,
                 rol=Rol.CHEF,
-                correo = request.json["correo"], 
+                nombre = request.json["nombre"], 
                 restaurante_id = request.json["restaurante_id"]
             )
             db.session.add(nuevo_usuario)
