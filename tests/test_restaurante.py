@@ -124,7 +124,7 @@ class TestRestaurante(TestCase):
                 tipo_comida=self.data_factory.sentence(),
                 is_rappi=random.choice([True, False]),
                 is_didi=random.choice([True, False]),
-                administrador=self.usuario_id,
+                administrador_id=self.usuario_id,
             )
 
             db.session.add(restaurante)
