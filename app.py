@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
 from modelos import db
+
 from vistas import (
     VistaIngrediente,
     VistaIngredientes,
@@ -13,6 +14,7 @@ from vistas import (
     VistaLogIn,
     VistaRestaurantes,
     VistaMenuSemana,
+    VistaChef
 )
 
 app = Flask(__name__)
@@ -38,5 +40,6 @@ api.add_resource(VistaRecetas, "/recetas/<int:id_usuario>")
 api.add_resource(VistaReceta, "/receta/<int:id_receta>")
 api.add_resource(VistaRestaurantes, "/restaurantes/<int:id_usuario>")
 api.add_resource(VistaMenuSemana, "/menu-semana")
+api.add_resource(VistaChef, '/chef')
 
 jwt = JWTManager(app)
