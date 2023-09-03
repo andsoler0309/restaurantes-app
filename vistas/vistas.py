@@ -272,7 +272,6 @@ class VistaReceta(Resource):
 class VistaRestaurantes(Resource):
     @jwt_required()
     def post(self, id_usuario):
-        # user_id = get_jwt_identity()
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         restaurante = Restaurante.query.filter(
             Restaurante.administrador_id == id_usuario
@@ -384,7 +383,14 @@ class VistaMenuSemana(Resource):
 
 class VistaChef(Resource):
     @jwt_required()
-    def post(self):
+    def post(self,id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+
+        if usuario is None:
+            return "El Administrador no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden crear Chef", 401
+        
         usuario = Usuario.query.filter(
             Usuario.usuario == request.json["usuario"]
         ).first()
