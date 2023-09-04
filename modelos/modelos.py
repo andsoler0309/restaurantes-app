@@ -60,11 +60,11 @@ class Rol(enum.Enum):
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    usuario = db.Column(db.String(128)) #correo del chef
+    usuario = db.Column(db.String(128))  # correo del chef
     contrasena = db.Column(db.String(50))
     rol = db.Column(db.Enum(Rol))
     nombre = db.Column(db.String(128))
-    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'))
+    restaurante_id = db.Column(db.Integer, db.ForeignKey("restaurante.id"))
     recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
     restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
 
@@ -74,13 +74,13 @@ class MenuSemana(db.Model):
     nombre = db.Column(db.String(50))
     fecha_inicial = db.Column(db.Date)
     fecha_final = db.Column(db.Date)
-    recetas = db.relationship('MenuReceta', cascade="all, delete, delete-orphan")
+    recetas = db.relationship("MenuReceta", cascade="all, delete, delete-orphan")
 
 
 class MenuReceta(db.Model):
-    __tablename__ = 'menu_receta'
-    menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'), primary_key=True)
-    receta = db.Column(db.Integer, db.ForeignKey('receta.id'), primary_key=True)
+    __tablename__ = "menu_receta"
+    menu = db.Column(db.Integer, db.ForeignKey("menu_semana.id"), primary_key=True)
+    receta = db.Column(db.Integer, db.ForeignKey("receta.id"), primary_key=True)
 
 
 class RestauranteSchema(SQLAlchemyAutoSchema):
