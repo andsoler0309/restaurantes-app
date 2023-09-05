@@ -379,7 +379,7 @@ class VistaMenuSemana(Resource):
         if diff_fecha.days != 6:
             return "Las fechas no tienen la diferencia correcta", 400
 
-        todos_menus = MenuSemana.query.all()
+        todos_menus = MenuSemana.query.filter_by(id_restaurante=id_restaurante).all()
         for menu in todos_menus:
             if (fecha_final >= menu.fecha_final >= fecha_inicial) or (
                 fecha_final >= menu.fecha_inicial >= fecha_inicial
