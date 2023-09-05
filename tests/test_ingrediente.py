@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from faker import Faker
 from faker.generator import random
-from modelos import db, Usuario, Ingrediente
+from modelos import db, Usuario, Ingrediente, Rol
 
 from app import app
 
@@ -20,7 +20,7 @@ class TestIngrediente(TestCase):
 
         # Se crea el usuario para identificarse en la aplicación
         usuario_nuevo = Usuario(
-            usuario=nombre_usuario, contrasena=contrasena_encriptada
+            usuario=nombre_usuario, contrasena=contrasena_encriptada, rol=Rol.ADMINISTRADOR
         )
         db.session.add(usuario_nuevo)
         db.session.commit()

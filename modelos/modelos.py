@@ -135,6 +135,8 @@ class UsuarioSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
     id = fields.String()
+    rol = fields.String()
+    
 
 
 class MenuRecetaSchema(SQLAlchemyAutoSchema):
