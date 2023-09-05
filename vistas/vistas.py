@@ -85,6 +85,7 @@ class VistaLogIn(Resource):
                 "mensaje": "Inicio de sesión exitoso",
                 "token": token_de_acceso,
                 "id": usuario.id,
+                "rol": usuario.rol.value,
             }
 
 
