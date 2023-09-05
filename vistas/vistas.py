@@ -85,6 +85,7 @@ class VistaLogIn(Resource):
                 "mensaje": "Inicio de sesión exitoso",
                 "token": token_de_acceso,
                 "id": usuario.id,
+                "rol": usuario.rol.name,
             }
 
 
@@ -415,3 +416,17 @@ class VistaChef(Resource):
             return {"mensaje": "chef creado exitosamente", "id": nuevo_usuario.id}
         else:
             return "El usuario ya existe", 404
+
+
+class VistaChefs(Resource):
+    @jwt_required()
+    def get(self):
+        chefs = Usuario.query.filter_by(rol=Rol.CHEF).order_by(Usuario.nombre).all()
+
+        resultados = [usuario_schema.dump(chef) for chef in chefs]
+
+        for chef in resultados:
+            restaurante = Restaurante.query.filter_by(id=chef["restaurantes"]).first()
+            chef["restaurante"] = restaurante_schema.dump(restaurante)
+
+        return resultados
