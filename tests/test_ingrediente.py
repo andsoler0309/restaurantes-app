@@ -20,7 +20,9 @@ class TestIngrediente(TestCase):
 
         # Se crea el usuario para identificarse en la aplicación
         usuario_nuevo = Usuario(
-            usuario=nombre_usuario, contrasena=contrasena_encriptada, rol=Rol.ADMINISTRADOR
+            usuario=nombre_usuario,
+            contrasena=contrasena_encriptada,
+            rol=Rol.ADMINISTRADOR,
         )
         db.session.add(usuario_nuevo)
         db.session.commit()

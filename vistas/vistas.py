@@ -421,16 +421,12 @@ class VistaChef(Resource):
 class VistaChefs(Resource):
     @jwt_required()
     def get(self):
-        chefs = (
-            Usuario.query.filter_by(rol=Rol.CHEF)
-            .order_by(Usuario.nombre)
-            .all()
-        )
+        chefs = Usuario.query.filter_by(rol=Rol.CHEF).order_by(Usuario.nombre).all()
 
         resultados = [usuario_schema.dump(chef) for chef in chefs]
 
         for chef in resultados:
-            restaurante = Restaurante.query.filter_by(id=chef['restaurantes']).first()
-            chef['restaurante'] = restaurante_schema.dump(restaurante)
-        
+            restaurante = Restaurante.query.filter_by(id=chef["restaurantes"]).first()
+            chef["restaurante"] = restaurante_schema.dump(restaurante)
+
         return resultados

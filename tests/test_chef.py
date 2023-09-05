@@ -8,6 +8,7 @@ from modelos import db, Usuario, Restaurante, Rol
 
 from app import app
 
+
 class TestChef(TestCase):
     def setUp(self):
         self.data_factory = Faker()
@@ -55,7 +56,6 @@ class TestChef(TestCase):
         db.session.add(self.restaurante)
         db.session.commit()
 
-
         self.token = respuesta_login["token"]
         self.usuario_id = respuesta_login["id"]
 
@@ -86,12 +86,12 @@ class TestChef(TestCase):
         }
 
         resultado_nuevo_chef = self.client.post(
-            f"/chefs/{self.usuario_id}", 
-            data=json.dumps(nuevo_chef), 
-            headers = {
+            f"/chefs/{self.usuario_id}",
+            data=json.dumps(nuevo_chef),
+            headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token}",
-            }
+            },
         )
 
         datos_respuesta = json.loads(resultado_nuevo_chef.get_data())
@@ -101,10 +101,9 @@ class TestChef(TestCase):
         # Se verifica los datos del chef creado
         self.assertIsNotNone(chef_creado)
         self.assertEqual(chef_creado.rol, Rol.CHEF)
-        self.assertEqual(chef_creado.nombre, nuevo_chef['nombre'])
-        self.assertEqual(chef_creado.usuario, nuevo_chef['usuario'])
-        self.assertEqual(chef_creado.restaurante_id, nuevo_chef['restaurante_id'])
-
+        self.assertEqual(chef_creado.nombre, nuevo_chef["nombre"])
+        self.assertEqual(chef_creado.usuario, nuevo_chef["usuario"])
+        self.assertEqual(chef_creado.restaurante_id, nuevo_chef["restaurante_id"])
 
     def test_listar_chefs(self):
         for i in range(3):
@@ -119,13 +118,12 @@ class TestChef(TestCase):
             db.session.commit()
             self.chefs_creados.append(nuevo_chef)
 
-
         solicitud_listar_chefs = self.client.get(
             "/chefs",
-            headers = {
+            headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token}",
-            }
+            },
         )
 
         respuesta_listar_chefs = json.loads(solicitud_listar_chefs.get_data())

@@ -136,7 +136,6 @@ class UsuarioSchema(SQLAlchemyAutoSchema):
 
     id = fields.String()
     rol = fields.String()
-    
 
 
 class MenuRecetaSchema(SQLAlchemyAutoSchema):
