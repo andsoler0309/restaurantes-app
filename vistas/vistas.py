@@ -348,26 +348,36 @@ class VistaMenuSemana(Resource):
         return [menu_semana_schema.dump(menu) for menu in menus]
 
     @jwt_required()
-    def post(self):
+    def post(self, id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        id_restaurante = None
+        if usuario is None:
+            return "El usuario no existe", 404
+        if usuario.rol is Rol.CHEF:
+            id_restaurante = usuario.restaurante_id
+        else:
+            id_restaurante = request.json["id_restaurante"]
         nombre_menu_repetido = MenuSemana.query.filter_by(
             nombre=request.json["nombre"]
         ).first()
+
         if nombre_menu_repetido is not None:
             return "El nombre del menu ya existe", 400
         try:
             fecha_inicial = datetime.strptime(
-                request.json["fecha_inicial"], "%Y-%m-%d"
+                request.json["fechaInicial"], "%Y-%m-%d"
             ).date()
             fecha_final = datetime.strptime(
-                request.json["fecha_final"], "%Y-%m-%d"
+                request.json["fechaFinal"], "%Y-%m-%d"
             ).date()
         except Exception as e:
             return str(e), 400
+
         diff_fecha = fecha_final - fecha_inicial
         if diff_fecha.days != 6:
             return "Las fechas no tienen la diferencia correcta", 400
 
-        todos_menus = MenuSemana.query.all()
+        todos_menus = MenuSemana.query.filter_by(id_restaurante=id_restaurante).all()
         for menu in todos_menus:
             if (fecha_final >= menu.fecha_final >= fecha_inicial) or (
                 fecha_final >= menu.fecha_inicial >= fecha_inicial
@@ -378,9 +388,10 @@ class VistaMenuSemana(Resource):
             nombre=request.json["nombre"],
             fecha_inicial=fecha_inicial,
             fecha_final=fecha_final,
+            id_restaurante=id_restaurante,
         )
         for receta_id in request.json["recetas"]:
-            receta_menu = MenuReceta(menu=nuevo_menu_semana.id, receta=receta_id)
+            receta_menu = MenuReceta(menu=nuevo_menu_semana.id, receta=receta_id["id"])
             nuevo_menu_semana.recetas.append(receta_menu)
         db.session.add(nuevo_menu_semana)
         db.session.commit()

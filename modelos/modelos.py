@@ -7,6 +7,15 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 db = SQLAlchemy()
 
 
+class MenuSemana(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    fecha_inicial = db.Column(db.Date)
+    fecha_final = db.Column(db.Date)
+    recetas = db.relationship("MenuReceta", cascade="all, delete, delete-orphan")
+    id_restaurante = db.Column(db.Integer, db.ForeignKey("restaurante.id"))
+
+
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -23,6 +32,11 @@ class Restaurante(db.Model):
     is_didi = db.Column(db.Boolean, unique=False, default=False)
     administrador_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
     chefs = db.relationship("Usuario", foreign_keys=[administrador_id])
+    menu_semana = db.relationship(
+        "MenuSemana",
+        cascade="all, delete, delete-orphan",
+        foreign_keys=[MenuSemana.id_restaurante],
+    )
 
 
 class Ingrediente(db.Model):
@@ -69,18 +83,11 @@ class Usuario(db.Model):
     restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
 
 
-class MenuSemana(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50))
-    fecha_inicial = db.Column(db.Date)
-    fecha_final = db.Column(db.Date)
-    recetas = db.relationship("MenuReceta", cascade="all, delete, delete-orphan")
-
-
 class MenuReceta(db.Model):
     __tablename__ = "menu_receta"
-    menu = db.Column(db.Integer, db.ForeignKey("menu_semana.id"), primary_key=True)
-    receta = db.Column(db.Integer, db.ForeignKey("receta.id"), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    menu = db.Column(db.Integer, db.ForeignKey("menu_semana.id"))
+    receta = db.Column(db.Integer, db.ForeignKey("receta.id"))
 
 
 class RestauranteSchema(SQLAlchemyAutoSchema):
