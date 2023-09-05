@@ -348,10 +348,8 @@ class VistaMenuSemana(Resource):
         return [menu_semana_schema.dump(menu) for menu in menus]
 
     @jwt_required()
-    def post(self,id_usuario):
-        usuario = Usuario.query.filter(
-            Usuario.id == id_usuario
-        ).first()
+    def post(self, id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         id_restaurante = None
         if usuario is None:
             return "El usuario no existe", 404
@@ -393,7 +391,7 @@ class VistaMenuSemana(Resource):
             id_restaurante=id_restaurante,
         )
         for receta_id in request.json["recetas"]:
-            receta_menu = MenuReceta(menu=nuevo_menu_semana.id,receta=receta_id["id"])
+            receta_menu = MenuReceta(menu=nuevo_menu_semana.id, receta=receta_id["id"])
             nuevo_menu_semana.recetas.append(receta_menu)
         db.session.add(nuevo_menu_semana)
         db.session.commit()
