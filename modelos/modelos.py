@@ -82,12 +82,12 @@ class Usuario(db.Model):
     recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
     restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
 
+
 class MenuReceta(db.Model):
     __tablename__ = "menu_receta"
     id = db.Column(db.Integer, primary_key=True)
     menu = db.Column(db.Integer, db.ForeignKey("menu_semana.id"))
     receta = db.Column(db.Integer, db.ForeignKey("receta.id"))
-
 
 
 class RestauranteSchema(SQLAlchemyAutoSchema):

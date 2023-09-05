@@ -16,7 +16,6 @@ from vistas import (
     VistaMenuSemana,
     VistaChef,
     VistaChefs,
-
 )
 
 app = Flask(__name__)
@@ -42,7 +41,7 @@ api.add_resource(VistaIngrediente, "/ingrediente/<int:id_ingrediente>")
 api.add_resource(VistaRecetas, "/recetas/<int:id_usuario>")
 api.add_resource(VistaReceta, "/receta/<int:id_receta>")
 api.add_resource(VistaRestaurantes, "/restaurantes/<int:id_usuario>")
-api.add_resource(VistaMenuSemana, '/menu-semana/<int:id_usuario>')
+api.add_resource(VistaMenuSemana, "/menu-semana/<int:id_usuario>")
 api.add_resource(VistaChef, "/chefs/<int:id_usuario>")
 api.add_resource(VistaChefs, "/chefs")
 
