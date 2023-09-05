@@ -70,20 +70,20 @@ class Rol(enum.Enum):
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    usuario = db.Column(db.String(128)) #correo del chef
+    usuario = db.Column(db.String(128))  # correo del chef
     contrasena = db.Column(db.String(50))
     rol = db.Column(db.Enum(Rol))
     nombre = db.Column(db.String(128))
-    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'))
+    restaurante_id = db.Column(db.Integer, db.ForeignKey("restaurante.id"))
     recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
     restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
-
 
 class MenuReceta(db.Model):
     __tablename__ = 'menu_receta'
     id = db.Column(db.Integer, primary_key=True)
     menu = db.Column(db.Integer, db.ForeignKey('menu_semana.id'))
     receta = db.Column(db.Integer, db.ForeignKey('receta.id'))
+
 
 class RestauranteSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -137,6 +137,7 @@ class UsuarioSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
     id = fields.String()
+    rol = fields.String()
 
 
 class MenuRecetaSchema(SQLAlchemyAutoSchema):

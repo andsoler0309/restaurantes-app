@@ -85,7 +85,7 @@ class VistaLogIn(Resource):
                 "mensaje": "Inicio de sesión exitoso",
                 "token": token_de_acceso,
                 "id": usuario.id,
-                "rol": usuario.rol.value,
+                "rol": usuario.rol.name,
             }
 
 
@@ -274,19 +274,23 @@ class VistaRestaurantes(Resource):
     @jwt_required()
     def post(self, id_usuario):
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
-        restaurante = Restaurante.query.filter(
-            Restaurante.administrador_id == id_usuario
-        ).filter(
-            Restaurante.nombre == request.json["nombre"]
-        ).first()
+        restaurante = (
+            Restaurante.query.filter(Restaurante.administrador_id == id_usuario)
+            .filter(Restaurante.nombre == request.json["nombre"])
+            .first()
+        )
 
         if usuario is None:
             return "El Administrador no existe", 404
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden crear Restaurantes", 401
         elif restaurante is not None:
-            
-            return "Ya existe un restaurante con nombre: " + request.json["nombre"] + str(restaurante), 422
+            return (
+                "Ya existe un restaurante con nombre: "
+                + request.json["nombre"]
+                + str(restaurante),
+                422,
+            )
 
         else:
             nuevo_restaurante = Restaurante(
@@ -302,7 +306,7 @@ class VistaRestaurantes(Resource):
                 is_rappi=request.json["is_rappi"],
                 is_didi=request.json["is_didi"],
                 is_domicilios=request.json["is_domicilios"],
-                administrador_id=id_usuario
+                administrador_id=id_usuario,
             )
 
         db.session.add(nuevo_restaurante)
@@ -395,16 +399,17 @@ class VistaMenuSemana(Resource):
         db.session.commit()
         return menu_semana_schema.dump(nuevo_menu_semana), 200
 
+
 class VistaChef(Resource):
     @jwt_required()
-    def post(self,id_usuario):
+    def post(self, id_usuario):
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
 
         if usuario is None:
             return "El Administrador no existe", 404
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden crear Chef", 401
-        
+
         usuario = Usuario.query.filter(
             Usuario.usuario == request.json["usuario"]
         ).first()
@@ -416,11 +421,25 @@ class VistaChef(Resource):
                 usuario=request.json["usuario"],
                 contrasena=contrasena_encriptada,
                 rol=Rol.CHEF,
-                nombre = request.json["nombre"], 
-                restaurante_id = request.json["restaurante_id"]
+                nombre=request.json["nombre"],
+                restaurante_id=request.json["restaurante_id"],
             )
             db.session.add(nuevo_usuario)
             db.session.commit()
             return {"mensaje": "chef creado exitosamente", "id": nuevo_usuario.id}
         else:
             return "El usuario ya existe", 404
+
+
+class VistaChefs(Resource):
+    @jwt_required()
+    def get(self):
+        chefs = Usuario.query.filter_by(rol=Rol.CHEF).order_by(Usuario.nombre).all()
+
+        resultados = [usuario_schema.dump(chef) for chef in chefs]
+
+        for chef in resultados:
+            restaurante = Restaurante.query.filter_by(id=chef["restaurantes"]).first()
+            chef["restaurante"] = restaurante_schema.dump(restaurante)
+
+        return resultados
