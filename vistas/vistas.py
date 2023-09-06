@@ -343,8 +343,19 @@ class VistaRestaurantes(Resource):
 
 class VistaMenuSemana(Resource):
     @jwt_required()
-    def get(self):
-        menus = MenuSemana.query.all()
+    def get(self, id_usuario):
+        print(id_usuario)
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        if usuario is None:
+            return "El usuario no existe", 404
+        if usuario.rol is Rol.CHEF:
+            menus = MenuSemana.query.filter_by(id_restaurante=usuario.restaurante_id).all()
+        else:
+            lista_restaurantes_id = [
+                restaurante.id for restaurante in
+                Restaurante.query.filter_by(administrador_id=id_usuario).all()
+            ]
+            menus = MenuSemana.query.filter(MenuSemana.id_restaurante.in_(lista_restaurantes_id)).all()
         return [menu_semana_schema.dump(menu) for menu in menus]
 
     @jwt_required()
