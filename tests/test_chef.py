@@ -119,7 +119,7 @@ class TestChef(TestCase):
             self.chefs_creados.append(nuevo_chef)
 
         solicitud_listar_chefs = self.client.get(
-            "/chefs",
+            f"/chefs/{self.usuario_id}",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token}",
