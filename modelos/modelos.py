@@ -14,6 +14,7 @@ class MenuSemana(db.Model):
     fecha_final = db.Column(db.Date)
     recetas = db.relationship("MenuReceta", cascade="all, delete, delete-orphan")
     id_restaurante = db.Column(db.Integer, db.ForeignKey("restaurante.id"))
+    id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
 
 
 class Restaurante(db.Model):
@@ -81,7 +82,11 @@ class Usuario(db.Model):
     restaurante_id = db.Column(db.Integer, db.ForeignKey("restaurante.id"))
     recetas = db.relationship("Receta", cascade="all, delete, delete-orphan")
     restaurantes = db.relationship("Restaurante", foreign_keys=[restaurante_id])
-
+    menu_semana = db.relationship(
+        "MenuSemana",
+        cascade="all, delete, delete-orphan",
+        foreign_keys=[MenuSemana.id_usuario],
+    )
 
 class MenuReceta(db.Model):
     __tablename__ = "menu_receta"
@@ -166,3 +171,4 @@ class MenuSemanaSchema(SQLAlchemyAutoSchema):
     fecha_inicial = fields.Date()
     fecha_final = fields.Date()
     recetas = fields.List(fields.Nested(MenuRecetaSchema()))
+    id_usuario = fields.Nested(UsuarioSchema())

@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -344,7 +346,6 @@ class VistaRestaurantes(Resource):
 class VistaMenuSemana(Resource):
     @jwt_required()
     def get(self, id_usuario):
-        print(id_usuario)
         usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
         if usuario is None:
             return "El usuario no existe", 404
@@ -400,6 +401,7 @@ class VistaMenuSemana(Resource):
             fecha_inicial=fecha_inicial,
             fecha_final=fecha_final,
             id_restaurante=id_restaurante,
+            id_usuario=id_usuario,
         )
         for receta_id in request.json["recetas"]:
             receta_menu = MenuReceta(menu=nuevo_menu_semana.id, receta=receta_id["id"])
