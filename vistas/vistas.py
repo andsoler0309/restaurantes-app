@@ -319,26 +319,19 @@ class VistaRestaurantes(Resource):
 
     @jwt_required()
     def get(self, id_usuario):
-        """
-        Get all restaurants from an administrator
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        if usuario is None:
+            return "El usuario no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden ver Restaurantes", 401
 
-        :param id_usuario: id of the administrator
-        :type id_usuario: int
-        :return: list of restaurants
-        :rtype: list
-        """
-        try:
-            restaurantes = (
-                Restaurante.query.filter_by(administrador_id=id_usuario)
-                .order_by(Restaurante.nombre)
-                .all()
-            )
-            return [
-                restaurante_schema.dump(restaurante) for restaurante in restaurantes
-            ]
-        except SQLAlchemyError:
-            error_message = "Error while querying the database"
-            return {"error": error_message}, 500
+        restaurantes = (
+            Restaurante.query.filter_by(administrador_id=id_usuario)
+            .order_by(Restaurante.nombre)
+            .all()
+        )
+
+        return [restaurante_schema.dump(restaurante) for restaurante in restaurantes]
 
 
 class VistaMenuSemana(Resource):
@@ -431,8 +424,27 @@ class VistaChef(Resource):
 
 class VistaChefs(Resource):
     @jwt_required()
-    def get(self):
-        chefs = Usuario.query.filter_by(rol=Rol.CHEF).order_by(Usuario.nombre).all()
+    def get(self, id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        if usuario is None:
+            return "El usuario no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden ver Chefs", 401
+
+        restaurantes_usuario = Restaurante.query.filter_by(
+            administrador_id=id_usuario
+        ).all()
+
+        chefs = (
+            Usuario.query.filter(
+                Usuario.restaurante_id.in_(
+                    [restaurante.id for restaurante in restaurantes_usuario]
+                ),
+                Usuario.rol == Rol.CHEF,
+            )
+            .order_by(Usuario.nombre)
+            .all()
+        )
 
         resultados = [usuario_schema.dump(chef) for chef in chefs]
 
