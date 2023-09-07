@@ -331,10 +331,7 @@ class VistaRestaurantes(Resource):
             .all()
         )
 
-        return [
-            restaurante_schema.dump(restaurante) for restaurante in restaurantes
-        ]
-
+        return [restaurante_schema.dump(restaurante) for restaurante in restaurantes]
 
 
 class VistaMenuSemana(Resource):
@@ -438,10 +435,16 @@ class VistaChefs(Resource):
             administrador_id=id_usuario
         ).all()
 
-        chefs = Usuario.query.filter(
-            Usuario.restaurante_id.in_([restaurante.id for restaurante in restaurantes_usuario]),
-            Usuario.rol == Rol.CHEF
-        ).order_by(Usuario.nombre).all()
+        chefs = (
+            Usuario.query.filter(
+                Usuario.restaurante_id.in_(
+                    [restaurante.id for restaurante in restaurantes_usuario]
+                ),
+                Usuario.rol == Rol.CHEF,
+            )
+            .order_by(Usuario.nombre)
+            .all()
+        )
 
         resultados = [usuario_schema.dump(chef) for chef in chefs]
 
