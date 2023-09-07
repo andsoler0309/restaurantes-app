@@ -86,7 +86,7 @@ class TestChef(TestCase):
         }
 
         resultado_nuevo_chef = self.client.post(
-            f"/chefs/{self.usuario_id}",
+            f"/chef/{self.usuario_id}",
             data=json.dumps(nuevo_chef),
             headers={
                 "Content-Type": "application/json",
