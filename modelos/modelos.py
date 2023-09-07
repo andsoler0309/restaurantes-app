@@ -103,6 +103,7 @@ class RestauranteSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
     id = fields.String()
+    menu_semana = fields.List(fields.Nested("MenuSemanaSchema"))
 
 
 class IngredienteSchema(SQLAlchemyAutoSchema):

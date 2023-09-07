@@ -86,7 +86,7 @@ class TestChef(TestCase):
         }
 
         resultado_nuevo_chef = self.client.post(
-            f"/chefs/{self.usuario_id}",
+            f"/chef/{self.usuario_id}",
             data=json.dumps(nuevo_chef),
             headers={
                 "Content-Type": "application/json",
@@ -119,7 +119,7 @@ class TestChef(TestCase):
             self.chefs_creados.append(nuevo_chef)
 
         solicitud_listar_chefs = self.client.get(
-            "/chefs",
+            f"/chefs/{self.usuario_id}",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token}",
