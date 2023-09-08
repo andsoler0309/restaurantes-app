@@ -421,6 +421,19 @@ class VistaChef(Resource):
         else:
             return "El usuario ya existe", 404
 
+    @jwt_required()
+    def get(self, id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+
+        if usuario is None:
+            return "El Administrador no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden ver el detalle del Chef", 401
+
+        chef = Usuario.query.filter(
+            Usuario.id == request.json["chef_id"]
+        ).first()
+        return usuario_schema.dump(chef)
 
 class VistaChefs(Resource):
     @jwt_required()
