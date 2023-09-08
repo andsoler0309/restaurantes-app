@@ -430,10 +430,9 @@ class VistaChef(Resource):
         elif usuario.rol != Rol.ADMINISTRADOR:
             return "Solo los Administradores pueden ver el detalle del Chef", 401
 
-        chef = Usuario.query.filter(
-            Usuario.id == request.json["chef_id"]
-        ).first()
+        chef = Usuario.query.filter(Usuario.id == request.json["chef_id"]).first()
         return usuario_schema.dump(chef)
+
 
 class VistaChefs(Resource):
     @jwt_required()
