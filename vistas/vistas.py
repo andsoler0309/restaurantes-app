@@ -343,13 +343,19 @@ class VistaMenuSemana(Resource):
         if usuario is None:
             return "El usuario no existe", 404
         if usuario.rol is Rol.CHEF:
-            menus = MenuSemana.query.filter_by(id_restaurante=usuario.restaurante_id).all()
+            menus = MenuSemana.query.filter_by(
+                id_restaurante=usuario.restaurante_id
+            ).all()
         else:
             lista_restaurantes_id = [
-                restaurante.id for restaurante in
-                Restaurante.query.filter_by(administrador_id=id_usuario).all()
+                restaurante.id
+                for restaurante in Restaurante.query.filter_by(
+                    administrador_id=id_usuario
+                ).all()
             ]
-            menus = MenuSemana.query.filter(MenuSemana.id_restaurante.in_(lista_restaurantes_id)).all()
+            menus = MenuSemana.query.filter(
+                MenuSemana.id_restaurante.in_(lista_restaurantes_id)
+            ).all()
         result = []
         for menu in menus:
             usuario = Usuario.query.filter_by(id=menu.id_usuario).first()

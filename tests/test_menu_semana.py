@@ -100,7 +100,6 @@ class TestMenuSemana(TestCase):
         self.assertEqual(datos_respuesta["nombre"], menu.nombre)
         self.assertIsNotNone(datos_respuesta["id"])
 
-
     def test_get_menu_semana(self):
         endpoint_menu_semana = "/menu-semana/1"
         headers = {
@@ -112,4 +111,3 @@ class TestMenuSemana(TestCase):
         )
         datos_respuesta = json.loads(resultado_get_menu_semana.get_data())
         self.assertEqual(resultado_get_menu_semana.status_code, 200)
-

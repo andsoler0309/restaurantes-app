@@ -88,6 +88,7 @@ class Usuario(db.Model):
         foreign_keys=[MenuSemana.id_usuario],
     )
 
+
 class MenuReceta(db.Model):
     __tablename__ = "menu_receta"
     id = db.Column(db.Integer, primary_key=True)
