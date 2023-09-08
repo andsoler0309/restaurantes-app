@@ -421,6 +421,7 @@ class VistaChef(Resource):
         else:
             return "El usuario ya existe", 404
 
+
 class VistaDetalleChef(Resource):
     @jwt_required()
     def get(self, id_usuario, id_chef):

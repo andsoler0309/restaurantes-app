@@ -150,9 +150,7 @@ class TestChef(TestCase):
         db.session.commit()
         self.chefs_creados.append(nuevo_chef)
 
-        chef_id = Usuario.query.filter(
-            Usuario.usuario == nuevo_chef.usuario
-        ).first().id        
+        chef_id = Usuario.query.filter(Usuario.usuario == nuevo_chef.usuario).first().id
 
         solicitud_detalle_chefs = self.client.get(
             f"/chef/{self.usuario_id}/{chef_id}",
