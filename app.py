@@ -15,6 +15,7 @@ from vistas import (
     VistaRestaurantes,
     VistaMenuSemana,
     VistaChef,
+    VistaDetalleChef,
     VistaChefs,
 )
 
@@ -42,6 +43,7 @@ api.add_resource(VistaRecetas, "/recetas/<int:id_usuario>")
 api.add_resource(VistaReceta, "/receta/<int:id_receta>")
 api.add_resource(VistaRestaurantes, "/restaurantes/<int:id_usuario>")
 api.add_resource(VistaMenuSemana, "/menu-semana/<int:id_usuario>")
+api.add_resource(VistaDetalleChef, "/chef/<int:id_usuario>/<int:id_chef>")
 api.add_resource(VistaChef, "/chef/<int:id_usuario>")
 api.add_resource(VistaChefs, "/chefs/<int:id_usuario>")
 
