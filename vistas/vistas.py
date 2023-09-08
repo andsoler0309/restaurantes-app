@@ -349,6 +349,7 @@ class VistaDetalleRestaurante(Resource):
         restaurante = Restaurante.query.filter(Restaurante.id == id_restaurante).first()
         return restaurante_schema.dump(restaurante)
 
+
 class VistaMenuSemana(Resource):
     @jwt_required()
     def get(self, id_usuario):

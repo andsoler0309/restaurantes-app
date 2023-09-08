@@ -176,8 +176,7 @@ class TestRestaurante(TestCase):
             "is_didi": is_didi_nuevo_restaurante,
         }
 
-
-         # Definir endpoint, encabezados y hacer el llamado
+        # Definir endpoint, encabezados y hacer el llamado
         endpoint_restaurante = f"/restaurantes/{self.usuario_id}"
         headers = {
             "Content-Type": "application/json",
@@ -193,9 +192,12 @@ class TestRestaurante(TestCase):
         restaurante = Restaurante.query.get(datos_respuesta["id"])
         self.restaurantes_creados.append(restaurante)
 
-        restaurante_id = Restaurante.query.filter(Restaurante.nombre == nombre_nuevo_restaurante)\
-            .filter(Restaurante.administrador_id == self.usuario_id)\
-                .first().id
+        restaurante_id = (
+            Restaurante.query.filter(Restaurante.nombre == nombre_nuevo_restaurante)
+            .filter(Restaurante.administrador_id == self.usuario_id)
+            .first()
+            .id
+        )
 
         solicitud_detalle_restaurante = self.client.get(
             f"/restaurantes/{self.usuario_id}/{restaurante_id}",
@@ -215,7 +217,3 @@ class TestRestaurante(TestCase):
         self.assertIn("direccion", restaurante)
         self.assertIn("hora_atencion", restaurante)
         self.assertIn("menu_semana", restaurante)
-        
-
-
-
