@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -336,9 +338,32 @@ class VistaRestaurantes(Resource):
 
 class VistaMenuSemana(Resource):
     @jwt_required()
-    def get(self):
-        menus = MenuSemana.query.all()
-        return [menu_semana_schema.dump(menu) for menu in menus]
+    def get(self, id_usuario):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+        if usuario is None:
+            return "El usuario no existe", 404
+        if usuario.rol is Rol.CHEF:
+            menus = MenuSemana.query.filter_by(
+                id_restaurante=usuario.restaurante_id
+            ).all()
+        else:
+            lista_restaurantes_id = [
+                restaurante.id
+                for restaurante in Restaurante.query.filter_by(
+                    administrador_id=id_usuario
+                ).all()
+            ]
+            menus = MenuSemana.query.filter(
+                MenuSemana.id_restaurante.in_(lista_restaurantes_id)
+            ).all()
+        result = []
+        for menu in menus:
+            usuario = Usuario.query.filter_by(id=menu.id_usuario).first()
+            menu_final = menu_semana_schema.dump(menu)
+            menu_final["usuario"] = UsuarioSchema(only=["usuario", "rol"]).dump(usuario)
+            menu_final["usuario"]["rol"] = usuario.rol.name
+            result.append(menu_final)
+        return result, 200
 
     @jwt_required()
     def post(self, id_usuario):
@@ -382,6 +407,7 @@ class VistaMenuSemana(Resource):
             fecha_inicial=fecha_inicial,
             fecha_final=fecha_final,
             id_restaurante=id_restaurante,
+            id_usuario=id_usuario,
         )
         for receta_id in request.json["recetas"]:
             receta_menu = MenuReceta(menu=nuevo_menu_semana.id, receta=receta_id["id"])
