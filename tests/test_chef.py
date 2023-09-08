@@ -139,28 +139,23 @@ class TestChef(TestCase):
             self.assertIn("restaurantes", chef)
 
     def test_detalle_chefs(self):
-        nuevo_chef = {
-            "nombre": self.data_factory.sentence(),
-            "usuario": self.data_factory.sentence(),
-            "contrasena": self.data_factory.sentence(),
-            "rol": Rol.CHEF.value,
-            "restaurante_id": self.restaurante.id,
-        }
-
+        nuevo_chef = Usuario(
+            nombre=self.data_factory.sentence(),
+            usuario=self.data_factory.sentence(),
+            contrasena=self.data_factory.sentence(),
+            rol=Rol.CHEF,
+            restaurante_id=self.restaurante.id,
+        )
         db.session.add(nuevo_chef)
         db.session.commit()
-        
-        respuesta_crear_chef = self.chefs_creados.append(nuevo_chef)
+        self.chefs_creados.append(nuevo_chef)
 
-        datos_respuesta = json.loads(respuesta_crear_chef.get_data())
-        chef_id = Usuario.query.get(datos_respuesta["id"])
-        chef_query = {
-            "chef_id": chef_id
-        }
+        chef_id = Usuario.query.filter(
+            Usuario.usuario == nuevo_chef.usuario
+        ).first().id        
 
         solicitud_detalle_chefs = self.client.get(
-            f"/chef/{self.usuario_id}",
-            data=json.dumps(chef_query),
+            f"/chef/{self.usuario_id}/{chef_id}",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token}",
