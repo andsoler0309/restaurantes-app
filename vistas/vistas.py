@@ -350,7 +350,14 @@ class VistaMenuSemana(Resource):
                 Restaurante.query.filter_by(administrador_id=id_usuario).all()
             ]
             menus = MenuSemana.query.filter(MenuSemana.id_restaurante.in_(lista_restaurantes_id)).all()
-        return [menu_semana_schema.dump(menu) for menu in menus]
+        result = []
+        for menu in menus:
+            usuario = Usuario.query.filter_by(id=menu.id_usuario).first()
+            menu_final = menu_semana_schema.dump(menu)
+            menu_final["usuario"] = UsuarioSchema(only=["usuario", "rol"]).dump(usuario)
+            menu_final["usuario"]["rol"] = usuario.rol.name
+            result.append(menu_final)
+        return result, 200
 
     @jwt_required()
     def post(self, id_usuario):

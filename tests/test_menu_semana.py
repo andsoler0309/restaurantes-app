@@ -83,14 +83,14 @@ class TestMenuSemana(TestCase):
             "recetas": [{"id": 1}, {"id": 2}, {"id": 3}],
             "id_restaurante": 1,
         }
-        endpoint_ingredientes = "/menu-semana/1"
+        endpoint_menu_semana = "/menu-semana/1"
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(self.token),
         }
 
         resultado_nuevo_menu_semana = self.client.post(
-            endpoint_ingredientes, data=json.dumps(nuevo_menu), headers=headers
+            endpoint_menu_semana, data=json.dumps(nuevo_menu), headers=headers
         )
         datos_respuesta = json.loads(resultado_nuevo_menu_semana.get_data())
         menu = MenuSemana.query.get(datos_respuesta["id"])
@@ -99,3 +99,17 @@ class TestMenuSemana(TestCase):
         self.assertEqual(resultado_nuevo_menu_semana.status_code, 200)
         self.assertEqual(datos_respuesta["nombre"], menu.nombre)
         self.assertIsNotNone(datos_respuesta["id"])
+
+
+    def test_get_menu_semana(self):
+        endpoint_menu_semana = "/menu-semana/1"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(self.token),
+        }
+        resultado_get_menu_semana = self.client.get(
+            endpoint_menu_semana, headers=headers
+        )
+        datos_respuesta = json.loads(resultado_get_menu_semana.get_data())
+        self.assertEqual(resultado_get_menu_semana.status_code, 200)
+
