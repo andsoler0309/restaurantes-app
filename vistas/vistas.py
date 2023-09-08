@@ -336,6 +336,19 @@ class VistaRestaurantes(Resource):
         return [restaurante_schema.dump(restaurante) for restaurante in restaurantes]
 
 
+class VistaDetalleRestaurante(Resource):
+    @jwt_required()
+    def get(self, id_usuario, id_restaurante):
+        usuario = Usuario.query.filter(Usuario.id == id_usuario).first()
+
+        if usuario is None:
+            return "El Administrador no existe", 404
+        elif usuario.rol != Rol.ADMINISTRADOR:
+            return "Solo los Administradores pueden ver el detalle del Restaurante", 401
+
+        restaurante = Restaurante.query.filter(Restaurante.id == id_restaurante).first()
+        return restaurante_schema.dump(restaurante)
+
 class VistaMenuSemana(Resource):
     @jwt_required()
     def get(self, id_usuario):

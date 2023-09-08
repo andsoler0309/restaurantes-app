@@ -144,3 +144,78 @@ class TestRestaurante(TestCase):
         datos_respuesta = json.loads(resultado_listar_restaurantes.get_data())
         self.assertEqual(resultado_listar_restaurantes.status_code, 200)
         self.assertEqual(len(datos_respuesta), 10)
+
+    def test_detalle_restaurante(self):
+        # Crear los datos del restaurante
+        nombre_nuevo_restaurante = self.data_factory.sentence()
+        direccion_nuevo_restaurante = self.data_factory.sentence()
+        telefono_nuevo_restaurante = self.data_factory.sentence()
+        facebook_nuevo_restaurante = self.data_factory.sentence()
+        twitter_nuevo_restaurante = self.data_factory.sentence()
+        instagram_nuevo_restaurante = self.data_factory.sentence()
+        hora_atencion_nuevo_restaurante = self.data_factory.sentence()
+        is_en_lugar_nuevo_restaurante = random.choice([True, False])
+        is_domicilios_nuevo_restaurante = random.choice([True, False])
+        tipo_comida_nuevo_restaurante = self.data_factory.sentence()
+        is_rappi_nuevo_restaurante = random.choice([True, False])
+        is_didi_nuevo_restaurante = random.choice([True, False])
+
+        # Crear el json con el restaurante a crear
+        nuevo_restaurante = {
+            "nombre": nombre_nuevo_restaurante,
+            "direccion": direccion_nuevo_restaurante,
+            "telefono": telefono_nuevo_restaurante,
+            "facebook": facebook_nuevo_restaurante,
+            "twitter": twitter_nuevo_restaurante,
+            "instagram": instagram_nuevo_restaurante,
+            "hora_atencion": hora_atencion_nuevo_restaurante,
+            "is_en_lugar": is_en_lugar_nuevo_restaurante,
+            "is_domicilios": is_domicilios_nuevo_restaurante,
+            "tipo_comida": tipo_comida_nuevo_restaurante,
+            "is_rappi": is_rappi_nuevo_restaurante,
+            "is_didi": is_didi_nuevo_restaurante,
+        }
+
+
+         # Definir endpoint, encabezados y hacer el llamado
+        endpoint_restaurante = f"/restaurantes/{self.usuario_id}"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.token}",
+        }
+
+        resultado_nuevo_restaurante = self.client.post(
+            endpoint_restaurante, data=json.dumps(nuevo_restaurante), headers=headers
+        )
+
+        # Obtener los datos de respuesta y dejarlos un objeto json y en el objeto a comparar
+        datos_respuesta = json.loads(resultado_nuevo_restaurante.get_data())
+        restaurante = Restaurante.query.get(datos_respuesta["id"])
+        self.restaurantes_creados.append(restaurante)
+
+        restaurante_id = Restaurante.query.filter(Restaurante.nombre == nombre_nuevo_restaurante)\
+            .filter(Restaurante.administrador_id == self.usuario_id)\
+                .first().id
+
+        solicitud_detalle_restaurante = self.client.get(
+            f"/restaurantes/{self.usuario_id}/{restaurante_id}",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.token}",
+            },
+        )
+
+        restaurante = json.loads(solicitud_detalle_restaurante.get_data())
+
+        self.assertEqual(solicitud_detalle_restaurante.status_code, 200)
+
+        self.assertIn("id", restaurante)
+        self.assertIn("nombre", restaurante)
+        self.assertIn("telefono", restaurante)
+        self.assertIn("direccion", restaurante)
+        self.assertIn("hora_atencion", restaurante)
+        self.assertIn("menu_semana", restaurante)
+        
+
+
+
