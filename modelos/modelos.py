@@ -17,7 +17,6 @@ class MenuSemana(db.Model):
     id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
 
 
-
 class Ingrediente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(128))
@@ -66,6 +65,7 @@ class Usuario(db.Model):
         foreign_keys=[MenuSemana.id_usuario],
     )
 
+
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -87,6 +87,7 @@ class Restaurante(db.Model):
         cascade="all, delete, delete-orphan",
         foreign_keys=[MenuSemana.id_restaurante],
     )
+
 
 class MenuReceta(db.Model):
     __tablename__ = "menu_receta"
